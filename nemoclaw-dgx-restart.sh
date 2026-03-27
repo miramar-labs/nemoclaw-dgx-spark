@@ -16,10 +16,23 @@ openshell gateway destroy --name nemoclaw 2>/dev/null || true
 openshell gateway start --name nemoclaw
 
 # ── 3. Connect or prompt onboard ──────────────────────────────────
-if nemoclaw my-assistant status &>/dev/null; then
+# If sandbox exists, connect. Otherwise onboard, then connect.
+if nemoclaw list 2>/dev/null | grep -qw 'my-assistant'; then
     nemoclaw my-assistant connect
 else
     echo ""
-    echo "No sandbox found. Run: nemoclaw onboard"
-    echo "After onboard completes run: ~/nemoclaw-dgx-restart.sh"
+    echo "No sandbox found for my-assistant."
+    echo "Starting onboard..."
+    nemoclaw onboard
+
+    # Clear stale forward again in case onboard partially set one up
+    openshell forward stop 18789 my-assistant 2>/dev/null || true
+
+    if nemoclaw list 2>/dev/null | grep -qw 'my-assistant'; then
+        nemoclaw my-assistant connect
+    else
+        echo "Sandbox still not available after onboard."
+        echo "Run: nemoclaw list"
+        exit 1
+    fi
 fi
