@@ -16,6 +16,9 @@ openshell gateway destroy --name nemoclaw 2>/dev/null || true
 openshell gateway start --name nemoclaw
 
 # ── 3. Connect or prompt onboard ──────────────────────────────────
+# Stop stale forward if present
+openshell forward stop 18789 my-assistant 2>/dev/null || true
+
 # If sandbox exists, connect. Otherwise onboard, then connect.
 if nemoclaw list 2>/dev/null | grep -qw 'my-assistant'; then
     nemoclaw my-assistant connect
@@ -35,4 +38,4 @@ else
         echo "Run: nemoclaw list"
         exit 1
     fi
-fi
+fi7
